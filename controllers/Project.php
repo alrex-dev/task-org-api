@@ -21,8 +21,9 @@ class Project {
         if ($search) {
             $kw = isset($_REQUEST['kw']) ? $_REQUEST['kw'] : '';
 
-            $sql = sprintf("SELECT id, proj_id, proj_name FROM projects WHERE proj_name LIKE '%%%s%%'", 
-                $this->db->_escapeSQLString($kw)
+            $sql = sprintf("SELECT id, proj_id, proj_name FROM projects WHERE proj_name LIKE '%%%s%%' OR proj_desc LIKE '%%%s%%'" 
+                , $this->db->_escapeSQLString($kw)
+                , $this->db->_escapeSQLString($kw)
             );
 
             $this->db->_setSQL($sql);
