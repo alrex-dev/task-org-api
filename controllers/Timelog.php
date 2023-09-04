@@ -14,12 +14,40 @@ class Timelog {
         call_user_func(array($this, $this->func));
     }
 
+    //$date     format(mm/dd/yyy)
+    public function prepareDate($date) {
+        $d = '';
+
+        if ($date) {
+            $d = date('Y-m-d', strtotime($date));
+        }
+
+        return $d;
+    }
+
     public function get() {
         $projID = isset($_REQUEST['projID']) ? $_REQUEST['projID'] : '';
+        $dateFrom = isset($_REQUEST['dateFrom']) ? $_REQUEST['dateFrom'] : '';
+        $dateTo = isset($_REQUEST['dateTo']) ? $_REQUEST['dateTo'] : '';
+
+        $dateFrom = $this->prepareDate($dateFrom);
+        $dateTo = $this->prepareDate($dateTo);
+
+        $filter = ' ';
+
+        if ($dateFrom || $dateTo) {
+            if ($dateFrom && $dateTo == '') {
+                $filter .= sprintf("AND log_date >= '%s'", $dateFrom);
+            } else if ($dateFrom == '' && $dateTo) {
+                $filter .= sprintf("AND log_date <= '%s'", $dateTo);
+            } else {
+                $filter .= sprintf("AND (log_date >= '%s' AND log_date <= '%s')", $dateFrom, $dateTo);
+            }
+        }
 
         $sql = sprintf("SELECT id, log_id, log_date, time_from, time_to FROM timelogs 
-            WHERE proj_id = '%s' ORDER BY log_date ASC, id ASC
-        ", $projID);
+            WHERE proj_id = '%s' %s ORDER BY log_date ASC, id ASC
+        ", $projID, $filter);
 
         $this->db->_setSQL($sql);
         $results = $this->db->_getQueryResults();

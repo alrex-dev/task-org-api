@@ -14,12 +14,53 @@ class Activity {
         call_user_func(array($this, $this->func));
     }
 
+    //$date     format(mm/dd/yyy)
+    public function prepareDate($date) {
+        $d = '';
+
+        if ($date) {
+            //$dArr = explode('/', $date);
+
+            //$d = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+
+            $d = date('Y-m-d', strtotime($date));
+        }
+
+        return $d;
+    }
+
     public function get() {
         $projID = isset($_REQUEST['projID']) ? $_REQUEST['projID'] : '';
+        $keyword = isset($_REQUEST['kw']) ? $_REQUEST['kw'] : '';
+        $dateFrom = isset($_REQUEST['dateFrom']) ? $_REQUEST['dateFrom'] : '';
+        $dateTo = isset($_REQUEST['dateTo']) ? $_REQUEST['dateTo'] : '';
+        
+        //echo $dateFrom;
+
+        $dateFrom = $this->prepareDate($dateFrom);
+        $dateTo = $this->prepareDate($dateTo);
+
+        $filter = ' ';
+
+        if ($keyword) {
+            $filter .= sprintf("AND act_desc LIKE '%%%s%%'", $this->db->_escapeSQLString($keyword));
+        }
+
+        if ($dateFrom || $dateTo) {
+            if ($dateFrom && $dateTo == '') {
+                $filter .= sprintf("AND act_date >= '%s'", $dateFrom);
+            } else if ($dateFrom == '' && $dateTo) {
+                $filter .= sprintf("AND act_date <= '%s'", $dateTo);
+            } else {
+                $filter .= sprintf("AND (act_date >= '%s' AND act_date <= '%s')", $dateFrom, $dateTo);
+            }
+        }
 
         $sql = sprintf("SELECT id, act_date, act_ref_log, act_desc FROM activities 
-            WHERE proj_id = '%s' ORDER BY act_date ASC, id ASC
-        ", $projID);
+            WHERE proj_id = '%s' %s ORDER BY act_date ASC, id ASC
+        ", $projID, $filter);
+
+        //echo $sql;
 
         $this->db->_setSQL($sql);
         $results = $this->db->_getQueryResults();

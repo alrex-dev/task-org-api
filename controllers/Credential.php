@@ -16,11 +16,22 @@ class Credential {
 
     public function get() {
         $projID = isset($_REQUEST['projID']) ? $_REQUEST['projID'] : '';
+        $keyword = isset($_REQUEST['kw']) ? $_REQUEST['kw'] : '';
+
+        $filter = '';
+
+        if ($keyword) {
+            $filter = sprintf("AND (a.group_name LIKE '%%%s%%' OR b.note_label LIKE '%%%s%%' OR b.note_value LIKE '%%%s%%')",
+            $this->db->_escapeSQLString($keyword),
+            $this->db->_escapeSQLString($keyword),
+            $this->db->_escapeSQLString($keyword)
+            );
+        }
 
         $sql = sprintf("SELECT a.id, a.group_name, b.id AS nid, b.note_label, b.note_value 
             FROM access_note_groups a RIGHT JOIN access_notes b ON a.id = b.group_id 
-            WHERE a.proj_id = '%s' ORDER BY a.id ASC, b.id ASC
-        ", $projID);
+            WHERE a.proj_id = '%s' %s ORDER BY a.id ASC, b.id ASC
+        ", $projID, $filter);
 
         $this->db->_setSQL($sql);
         $results = $this->db->_getQueryResults();

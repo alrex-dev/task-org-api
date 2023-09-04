@@ -15,8 +15,10 @@ class Session {
     }
 
     public function get() {
-        $sql = sprintf("SELECT * FROM current_session ORDER BY id DESC LIMIT 0, 1");
+        $projID = isset($_REQUEST['projID']) ? $_REQUEST['projID'] : '';
 
+        $sql = sprintf("SELECT * FROM current_session WHERE proj_id = '%s' ORDER BY id DESC LIMIT 0, 1", $projID);
+        
         $this->db->_setSQL($sql);
         $result = $this->db->_getQuerySingleResult();
 
