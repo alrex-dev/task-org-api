@@ -30,6 +30,7 @@ use Controllers\CredentialGroup;
 use Controllers\Timelog;
 use Controllers\Activity;
 use Controllers\Session;
+use Controllers\RecentActivities;
 use Controllers\NodeTask;
 
 $entityObj = null;
@@ -56,6 +57,10 @@ switch($entity) {
 
     case 'session':
         $entityObj = new Session($requestMethod, $db);
+    break;
+
+    case 'recent-activities':
+        $entityObj = new RecentActivities($requestMethod, $db);
     break;
 
     case 'nodetask':
